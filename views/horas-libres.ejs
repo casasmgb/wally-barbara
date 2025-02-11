@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Horas Libres - Canchas de Wally</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .ocupada {
+            background-color: #f44336 !important;
+            /* Rojo para ocupado */
+            color: white !important;
+        }
+
+        .libre {
+            background-color: #4caf50 !important;
+            /* Verde para libre */
+            color: white !important;
+        }
+
+        .hora {
+            cursor: pointer;
+        }
+
+        .hora.ocupada {
+            cursor: not-allowed;
+            /* No se puede hacer clic en horarios ocupados */
+        }
+
+        .fecha-selector {
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin: 0 10px;
+        }
+
+        .fecha-input {
+            font-size: 1.3rem;
+            padding: 5px;
+            width: 150px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Canchas de Wally</a>
+        </div>
+    </nav>
+
+    <header class="bg-primary text-white text-center py-4">
+        <h1>Horas Libres</h1>
+    </header>
+
+    <section class="container my-5">
+        <h2 class="text-center">Disponibilidad de Canchas</h2>
+
+        <!-- Selector de fecha -->
+        <div class="text-center mb-4">
+            <span class="fecha-selector" onclick="cambiarFecha(-1)">&#60;</span>
+            <input type="date" id="fecha-selector" class="fecha-input" value="<%= fecha %>" min="<%= fechaMinima %>"
+                onchange="cambiarFechaManual()">
+            <span class="fecha-selector" onclick="cambiarFecha(1)">&#62;</span>
+        </div>
+
+        <div class="row">
+            <!-- Cancha 1 -->
+            <div class="col-md-6">
+                <h4>Cancha 1</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Horario</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% horariosCancha1.forEach(horario=> { %>
+                            <tr>
+                                <td class="hora <%= horario.ocupada ? 'ocupada' : 'libre' %>"
+                                    onclick="enviarMensaje('<%= horario.hora %>', '<%= horario.ocupada %>')">
+                                    <%= horario.hora %>
+                                </td>
+                                <td>
+                                    <%= horario.ocupada ? 'Ocupada' : 'Libre' %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Cancha 2 -->
+            <div class="col-md-6">
+                <h4>Cancha 2</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Horario</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% horariosCancha2.forEach(horario=> { %>
+                            <tr>
+                                <td class="hora <%= horario.ocupada ? 'ocupada' : 'libre' %>"
+                                    onclick="enviarMensaje('<%= horario.hora %>', '<%= horario.ocupada %>')">
+                                    <%= horario.hora %>
+                                </td>
+                                <td>
+                                    <%= horario.ocupada ? 'Ocupada' : 'Libre' %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Función para cambiar la fecha al hacer clic en los íconos de flecha
+        function cambiarFecha(diferencia) {
+            const fechaActual = document.getElementById('fecha-selector').value;
+            let [year, month, day] = fechaActual.split('-').map(num => parseInt(num));
+            let nuevaFecha = new Date(year, month - 1, day);
+            nuevaFecha.setDate(nuevaFecha.getDate() + diferencia);
+
+            // Obtener la fecha de hoy
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); // Establecer a medianoche para comparar solo la fecha
+
+            // Validar que no se pueda ir más atrás que hoy
+            if (nuevaFecha < hoy) {
+                // Si la nueva fecha es anterior a hoy, no hacer nada
+                return;
+            }
+
+            let nuevaFechaFormateada = nuevaFecha.toISOString().split('T')[0];
+            document.getElementById('fecha-selector').value = nuevaFechaFormateada;
+            window.location.href = `/horas-libres?fecha=${nuevaFechaFormateada}`;
+        }
+
+
+        // Función para cambiar la fecha cuando el usuario la selecciona manualmente
+        function cambiarFechaManual() {
+            const nuevaFecha = document.getElementById('fecha-selector').value;
+            window.location.href = `/horas-libres?fecha=${nuevaFecha}`;
+        }
+
+        // Función para simular el envío del mensaje por WhatsApp
+        function enviarMensaje(horaSeleccionada) {
+            const mensaje = `¡Hola! Soy [tu nombre], me gustaría hacer una reserva para la(s) hora(s): ${horaSeleccionada}. ¡Gracias!`;
+            const telefono = '59163135310';  // Número de WhatsApp
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+
+    <footer class="bg-dark text-white text-center py-4">
+        <p>&copy; 2025 Canchas de Wally</p>
+    </footer>
+</body>
+
+</html>
